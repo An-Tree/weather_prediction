@@ -2,6 +2,8 @@
 
 一个基于FastAPI和模拟MLP模型的天气预测系统，提供7天预报、小时级预报、实时天气和生活指数等功能。
 
+![项目截图](pic\pic1.png)
+
 ## 项目概述
 这是一个基于FastAPI和模拟MLP模型的天气预测应用，提供7天天气预报、小时级预报、实时天气和生活指数等功能。前端使用HTML、JavaScript、Tailwind CSS和Chart.js实现数据可视化，后端采用Python FastAPI框架提供API服务。
 
