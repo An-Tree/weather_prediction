@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7天天气预报</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9', 
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        success: '#00B42A',
+                        dark: '#1D2129',
+                        'gray-light': '#F2F3F5',
+                        'gray-medium': '#C9CDD4',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .weather-card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .chat-shadow {
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            }
+            .gradient-bg {
+                background: linear-gradient(135deg, #165DFF 0%, #36CFC9 100%);
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 text-dark min-h-screen">
+    <!-- 顶部导航栏 -->
+    <header class="gradient-bg text-white shadow-md">
+        <div class="container mx-auto px-4 py-5 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <i class="fa fa-cloud text-2xl mr-3"></i>
+                <h1 class="text-[clamp(1.5rem,3vw,2rem)] font-bold">天气预报</h1>
+            </div>
+            <div class="flex flex-col md:flex-row items-center w-full md:w-auto">
+                <div class="relative w-full md:w-64 mb-3 md:mb-0 md:mr-4">
+                    <input type="text" placeholder="搜索城市..." class="w-full px-4 py-2 rounded-full text-dark pl-10 focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <i class="fa fa-search absolute left-4 top-1/2 transform -translate-y-1/2"></i>
+                </div>
+                <div class="flex space-x-3">
+                    <button class="p-2 rounded-full hover:bg-white/20 transition-colors">
+                        <i class="fa fa-map-marker"></i>
+                    </button>
+                    <button class="p-2 rounded-full hover:bg-white/20 transition-colors">
+                        <i class="fa fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- 当前城市和日期 -->
+        <div class="mb-6">
+            <h2 class="text-[clamp(1.2rem,2vw,1.5rem)] font-semibold">北京市 <span class="text-gray-500 text-sm font-normal">更新于: 2023-06-15 14:30</span></h2>
+            <p class="text-gray-500">今天是 <span id="current-date"></span></p>
+        </div>
+
+        <!-- 天气预警 -->
+        <div class="bg-yellow-50 border-l-4 border-warning p-4 rounded-r mb-6 hidden" id="weather-alert">
+            <div class="flex items-start">
+                <i class="fa fa-exclamation-triangle text-warning mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-warning">高温黄色预警</h3>
+                    <p class="text-sm text-gray-600">未来三天最高气温将达到35°C以上，请注意防暑降温。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 当前天气概览 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 weather-card-shadow flex flex-col items-center justify-center">
+                <div class="text-5xl mb-2"><i class="fa fa-sun-o text-warning"></i></div>
+                <div class="text-4xl font-bold mb-1">28°C</div>
+                <div class="text-gray-500">晴朗</div>
+            </div>
+            <div class="bg-white rounded-xl p-6 weather-card-shadow grid grid-cols-2 gap-4">
+                <div class="flex flex-col items-center">
+                    <i class="fa fa-tint text-primary mb-2"></i>
+                    <span class="text-gray-500 text-sm">降水量</span>
+                    <span class="font-semibold">0 mm</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fa fa-location-arrow text-gray-500 mb-2"></i>
+                    <span class="text-gray-500 text-sm">风速</span>
+                    <span class="font-semibold">3 m/s</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fa fa-sun-o text-warning mb-2"></i>
+                    <span class="text-gray-500 text-sm">紫外线</span>
+                    <span class="font-semibold">中等</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fa fa-tachometer text-secondary mb-2"></i>
+                    <span class="text-gray-500 text-sm">空气质量</span>
+                    <span class="font-semibold">良好 (65)</span>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-6 weather-card-shadow grid grid-cols-2 gap-4">
+                <div class="flex flex-col">
+                    <span class="text-gray-500 text-sm">日出</span>
+                    <span class="font-semibold">05:13</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-gray-500 text-sm">日落</span>
+                    <span class="font-semibold">19:45</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-gray-500 text-sm">湿度</span>
+                    <span class="font-semibold">45%</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-gray-500 text-sm">气压</span>
+                    <span class="font-semibold">1008 hPa</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7天天气预报 -->
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">7天天气预报</h2>
+            <div class="grid grid-cols-1 md:grid-cols-7 gap-4" id="weekly-forecast">
+                <!-- 每日天气预报卡片将通过JavaScript动态生成 -->
+            </div>
+        </section>
+
+        <!-- 小时预报图表 -->
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">24小时预报</h2>
+            <div class="bg-white rounded-xl p-6 weather-card-shadow">
+                <canvas id="hourly-chart" height="120"></canvas>
+            </div>
+        </section>
+
+        <!-- 生活指数 -->
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">生活指数</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                <div class="bg-white rounded-xl p-4 weather-card-shadow text-center">
+                    <div class="text-primary text-xl mb-2"><i class="fa fa-shopping-bag"></i></div>
+                    <h3 class="text-sm font-medium mb-1">穿衣</h3>
+                    <p class="text-xs text-gray-500">舒适</p>
+                </div>
+                <div class="bg-white rounded-xl p-4 weather-card-shadow text-center">
+                    <div class="text-warning text-xl mb-2"><i class="fa fa-sun-o"></i></div>
+                    <h3 class="text-sm font-medium mb-1">防晒</h3>
+                    <p class="text-xs text-gray-500">需要</p>
+                </div>
+                <div class="bg-white rounded-xl p-4 weather-card-shadow text-center">
+                    <div class="text-secondary text-xl mb-2"><i class="fa fa-leaf"></i></div>
+                    <h3 class="text-sm font-medium mb-1">运动</h3>
+                    <p class="text-xs text-gray-500">适宜</p>
+                </div>
+                <div class="bg-white rounded-xl p-4 weather-card-shadow text-center">
+                    <div class="text-primary text-xl mb-2"><i class="fa fa-car"></i></div>
+                    <h3 class="text-sm font-medium mb-1">洗车</h3>
+                    <p class="text-xs text-gray-500">适宜</p>
+                </div>
+                <div class="bg-white rounded-xl p-4 weather-card-shadow text-center">
+                    <div class="text-danger text-xl mb-2"><i class="fa fa-bed"></i></div>
+                    <h3 class="text-sm font-medium mb-1">睡眠</h3>
+                    <p class="text-xs text-gray-500">良好</p>
+                </div>
+                <div class="bg-white rounded-xl p-4 weather-card-shadow text-center">
+                    <div class="text-warning text-xl mb-2"><i class="fa fa-cutlery"></i></div>
+                    <h3 class="text-sm font-medium mb-1">晾晒</h3>
+                    <p class="text-xs text-gray-500">适宜</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 天气聊天对话框 -->
+    <div id="weather-chat" class="fixed bottom-0 right-0 w-full md:w-80 bg-white rounded-t-xl chat-shadow transform translate-y-full transition-transform duration-300 ease-in-out">
+        <div class="gradient-bg text-white p-4 rounded-t-xl flex justify-between items-center cursor-pointer" id="chat-header">
+            <h3 class="font-semibold">天气助手</h3>
+            <div class="flex space-x-2">
+                <button id="minimize-chat" class="p-1 hover:bg-white/20 rounded-full"><i class="fa fa-window-minimize"></i></button>
+                <button id="close-chat" class="p-1 hover:bg-white/20 rounded-full"><i class="fa fa-times"></i></button>
+            </div>
+        </div>
+        <div class="h-80 overflow-y-auto p-4" id="chat-messages">
+            <div class="flex items-start mb-4">
+                <div class="bg-gray-light rounded-full p-2 mr-3"><i class="fa fa-robot text-gray-500"></i></div>
+                <div class="bg-gray-light rounded-lg rounded-tl-none p-3 max-w-[80%]">
+                    <p class="text-sm">您好！我是天气助手，有什么可以帮您的吗？</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-3 border-t">
+            <div class="flex">
+                <input type="text" placeholder="输入您的问题..." class="flex-1 px-4 py-2 rounded-full border border-gray-medium focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                <button class="ml-2 bg-primary text-white p-2 rounded-full hover:bg-primary/90 transition-colors">
+                    <i class="fa fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
