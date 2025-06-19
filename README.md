@@ -42,7 +42,7 @@
 
 我们的方法框架如下图所示，主要由三大创新模块构成：**复杂度感知的趋势提取 (Complexity-Aware Trend Extraction, CATE)**、**信息感知的变量交互 (Information-Aware Variable Interaction, IAVI)** 和 **趋势感知的预测 (Trend-Aware Forecasting, TAF)**。
 
-![framework](pic\method.png)
+![framework](pic/method.png)
 
 
 
@@ -82,7 +82,7 @@ graph TD
 
 ### 3.2 核心模块与算法
 
-![framework](pic\framework.png)
+![framework](pic/framework.png)
 
 #### 3.2.1 复杂度感知的趋势提取 (CATE)
 
